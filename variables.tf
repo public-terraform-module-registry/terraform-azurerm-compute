@@ -141,8 +141,8 @@ variable "boot_diagnostics" {
   default     = "false"
 }
 
-variable "boot_diagonistics_sa_name" {
-    description = "(Optional) Name of storage account boot diagnostics"
+variable "boot_diagnostics_sa_name" {
+  description = "(Optional) Name of storage account boot diagnostics"
 }
 
 variable "boot_diagnostics_sa_type" {
