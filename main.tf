@@ -27,7 +27,7 @@ resource "random_id" "vm-sa" {
 
 resource "azurerm_storage_account" "vm-sa" {
   count                    = "${var.boot_diagnostics == "true" ? 1 : 0}"
-  name                     = "bootdiag${lower(random_id.vm-sa.hex)}"
+  name                     = "${var.boot_diagnostics_sa_name} "
   resource_group_name      = "${azurerm_resource_group.vm.name}"
   location                 = "${var.location}"
   account_tier             = "${element(split("_", var.boot_diagnostics_sa_type),0)}"
