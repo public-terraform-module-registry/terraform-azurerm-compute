@@ -27,7 +27,7 @@ resource "random_id" "vm-sa" {
 
 resource "azurerm_storage_account" "vm-sa" {
   count                    = "${var.boot_diagnostics == "true" ? 1 : 0}"
-  name                     = "${var.boot_diagnostics_sa_name}"
+  name                     = "bootdiag${lower(random_id.vm-sa.hex)}"
   resource_group_name      = "${azurerm_resource_group.vm.name}"
   location                 = "${var.location}"
   account_tier             = "${element(split("_", var.boot_diagnostics_sa_type),0)}"
@@ -80,7 +80,7 @@ resource "azurerm_virtual_machine" "vm-linux" {
 
   boot_diagnostics {
     enabled     = "${var.boot_diagnostics}"
-    storage_uri = "${var.boot_diagnostics == "true" ? azurerm_storage_account.vm-sa.0.primary_blob_endpoint : "" }"
+    storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
 
   depends_on = ["azurerm_storage_account.vm-sa"]
