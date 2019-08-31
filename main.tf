@@ -68,7 +68,7 @@ resource "azurerm_virtual_machine" "vm-linux" {
   }
 
   os_profile_linux_config {
-    disable_password_authentication = true
+    disable_password_authentication = "${var.disable_password_authentication}"
 
     ssh_keys {
       path     = "/home/${var.admin_username}/.ssh/authorized_keys"
@@ -127,7 +127,7 @@ resource "azurerm_virtual_machine" "vm-linux-with-datadisk" {
   }
 
   os_profile_linux_config {
-    disable_password_authentication = true
+    disable_password_authentication = "${var.disable_password_authentication}"
 
     ssh_keys {
       path     = "/home/${var.admin_username}/.ssh/authorized_keys"
