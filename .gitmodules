@@ -1,0 +1,6 @@
+[submodule "mount-datadisks"]
+	path = mount-datadisks
+	url = https://github.com/public-ansible-playbooks/mount-datadisks.git
+[submodule "mount-shell"]
+	path = mount-shell
+	url = https://github.com/nm7-jp/mount-shell.git
