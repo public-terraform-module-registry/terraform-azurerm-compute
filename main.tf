@@ -72,7 +72,7 @@ resource "azurerm_virtual_machine" "vm-linux-no-az" {
 }
 
 resource "azurerm_virtual_machine" "vm-linux-with-az" {
-  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true" && var.data_disk == "false" && && var.zones != "" ? var.nb_instances : 0}"
+  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true" && var.data_disk == "false" && var.zones != "" ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}${count.index}"
   location                      = "${var.location}"
   zones                         = ["${var.zones}"]
