@@ -8,8 +8,13 @@ variable "location" {
 }
 
 variable "zones" {
-  description = "a single item of the Availability Zone which the Virtual Machine should be allocated."
-  default = ""
+  description = "(Optional)a single item of the Availability Zone which the Virtual Machine should be allocated."
+  default     = ""
+}
+
+variable "availability_set_id" {
+  description = "(Optional) The ID of the Availability Set in which the Virtual Machine should exist. Changing this forces a new resource to be created."
+  default     = ""
 }
 
 variable "vnet_subnet_id" {
@@ -59,6 +64,11 @@ variable "custom_data" {
 variable "storage_account_type" {
   description = "Defines the type of storage account to be created. Valid options are Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS."
   default     = "Premium_LRS"
+}
+
+variable "os_disk_caching" {
+  description = "(Optional) Specifies the caching requirements for the OS Disk. Possible values include None, ReadOnly and ReadWrite.Default value is set to ReadWrite."
+  default     = "ReadWrite"
 }
 
 variable "vm_size" {
