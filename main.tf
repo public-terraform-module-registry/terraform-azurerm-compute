@@ -213,6 +213,8 @@ resource "azurerm_virtual_machine" "vm-windows-no-az" {
     enabled     = "${var.boot_diagnostics}"
     storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
+
+  depends_on = ["azurerm_storage_account.vm-sa"]
 }
 
 resource "azurerm_virtual_machine" "vm-windows-with-az" {
@@ -256,6 +258,7 @@ resource "azurerm_virtual_machine" "vm-windows-with-az" {
     enabled     = "${var.boot_diagnostics}"
     storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
+  depends_on = ["azurerm_storage_account.vm-sa"]
 }
 
 resource "azurerm_virtual_machine" "vm-windows-with-availability-set" {
@@ -299,6 +302,7 @@ resource "azurerm_virtual_machine" "vm-windows-with-availability-set" {
     enabled     = "${var.boot_diagnostics}"
     storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
+  depends_on = ["azurerm_storage_account.vm-sa"]
 }
 
 resource "azurerm_public_ip" "vm" {
