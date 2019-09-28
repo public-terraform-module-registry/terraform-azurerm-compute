@@ -73,7 +73,7 @@ resource "azurerm_virtual_machine" "vm-linux-no-az" {
 
 resource "azurerm_virtual_machine" "vm-linux-with-az" {
   count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true" && var.zones != "" && var.availability_set_id == "" ? var.nb_instances : 0}"
-  name                          = "${var.vm_hostname}${count.index}"
+  name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   zones                         = ["${var.zones}"]
   resource_group_name           = "${var.resource_group_name}"
@@ -124,7 +124,7 @@ resource "azurerm_virtual_machine" "vm-linux-with-az" {
 
 resource "azurerm_virtual_machine" "vm-linux-with-availability-set" {
   count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true"  && var.zones == "" && var.availability_set_id != "" ? var.nb_instances : 0}"
-  name                          = "${var.vm_hostname}${count.index}"
+  name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   availability_set_id           = "${var.availability_set_id}"
   resource_group_name           = "${var.resource_group_name}"
@@ -175,7 +175,7 @@ resource "azurerm_virtual_machine" "vm-linux-with-availability-set" {
 
 resource "azurerm_virtual_machine" "vm-windows-no-az" {
   count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows"))) &&  var.zones == "" && var.availability_set_id == ""  ? var.nb_instances : 0}"
-  name                          = "${var.vm_hostname}${count.index}"
+  name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   resource_group_name           = "${var.resource_group_name}"
   vm_size                       = "${var.vm_size}"
@@ -219,7 +219,7 @@ resource "azurerm_virtual_machine" "vm-windows-no-az" {
 
 resource "azurerm_virtual_machine" "vm-windows-with-az" {
   count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows")) ) &&  var.zones != "" && var.availability_set_id == "" ? var.nb_instances : 0}"
-  name                          = "${var.vm_hostname}${count.index}"
+  name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   zones                         = ["${var.zones}"]
   resource_group_name           = "${var.resource_group_name}"
@@ -264,7 +264,7 @@ resource "azurerm_virtual_machine" "vm-windows-with-az" {
 
 resource "azurerm_virtual_machine" "vm-windows-with-availability-set" {
   count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows")) ) &&  var.zones == "" && var.availability_set_id != "" ? var.nb_instances : 0}"
-  name                          = "${var.vm_hostname}${count.index}"
+  name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   availability_set_id           = "${var.availability_set_id}"
   resource_group_name           = "${var.resource_group_name}"
@@ -309,7 +309,7 @@ resource "azurerm_virtual_machine" "vm-windows-with-availability-set" {
 
 resource "azurerm_public_ip" "vm" {
   count                        = "${var.nb_public_ip}"
-  name                         = "${var.vm_hostname}-${count.index}-publicIP"
+  name                         = "${var.vm_hostname}${format("publicIP%03d",count.index+1)}"
   location                     = "${var.location}"
   resource_group_name          = "${var.resource_group_name}"
   public_ip_address_allocation = "${var.public_ip_address_allocation}"
@@ -319,13 +319,13 @@ resource "azurerm_public_ip" "vm" {
 
 resource "azurerm_network_interface" "vm" {
   count                         = "${var.nb_instances}"
-  name                          = "nic-${var.vm_hostname}-${count.index}"
+  name                          = "${var.vm_hostname}${format("nic%03d",count.index+1)}"
   location                      = "${var.location}"
   resource_group_name           = "${var.resource_group_name}"
   enable_accelerated_networking = "${var.enable_accelerated_networking}"
 
   ip_configuration {
-    name                          = "ipconfig${count.index}"
+    name                          = "${format("ipconfig%03d",count.index+1)}"
     subnet_id                     = "${var.vnet_subnet_id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${length(azurerm_public_ip.vm.*.id) > 0 ? element(concat(azurerm_public_ip.vm.*.id, list("")), count.index) : ""}"
