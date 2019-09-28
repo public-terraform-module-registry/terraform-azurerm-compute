@@ -1,6 +1,6 @@
 output "vm_ids" {
   description = "Virtual machine ids created."
-  value       = "${concat(azurerm_virtual_machine.vm-windows-no-az.*.id,azurerm_virtual_machine.vm-windows-no-az-with-datadisk.*.id, azurerm_virtual_machine.vm-linux-no-az.*.id,azurerm_virtual_machine.vm-linux-no-az-with-datadisk.*.id,azurerm_virtual_machine.vm-windows-with-az.*.id,azurerm_virtual_machine.vm-windows-with-az-with-datadisk.*.id, azurerm_virtual_machine.vm-linux-with-az.*.id,azurerm_virtual_machine.vm-linux-with-az-with-datadisk.*.id)}"
+  value       = "${concat(azurerm_virtual_machine.vm-windows-no-az.*.id, azurerm_virtual_machine.vm-linux-no-az.*.id,azurerm_virtual_machine.vm-windows-with-az.*.id,azurerm_virtual_machine.vm-linux-with-az.*.id,azurerm_virtual_machine.vm-windows-with-availability-set.*.id,azurerm_virtual_machine.vm-linux-with-availability-set.*.id)}"
 }
 
 output "network_interface_ids" {
