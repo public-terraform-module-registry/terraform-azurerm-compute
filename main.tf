@@ -123,7 +123,7 @@ resource "azurerm_virtual_machine" "vm-linux-with-az" {
 }
 
 resource "azurerm_virtual_machine" "vm-linux-with-availability-set" {
-  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true" " && var.zones == "" && var.availability_set_id != "" ? var.nb_instances : 0}"
+  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true"  && var.zones == "" && var.availability_set_id != "" ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}${count.index}"
   location                      = "${var.location}"
   availability_set_id           = "${var.availability_set_id}"
@@ -258,6 +258,7 @@ resource "azurerm_virtual_machine" "vm-windows-with-az" {
     enabled     = "${var.boot_diagnostics}"
     storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
+
   depends_on = ["azurerm_storage_account.vm-sa"]
 }
 
@@ -302,6 +303,7 @@ resource "azurerm_virtual_machine" "vm-windows-with-availability-set" {
     enabled     = "${var.boot_diagnostics}"
     storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
+
   depends_on = ["azurerm_storage_account.vm-sa"]
 }
 
