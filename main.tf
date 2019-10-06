@@ -18,11 +18,17 @@ resource "azurerm_storage_account" "vm-sa" {
   location                 = "${var.location}"
   account_tier             = "${element(split("_", var.boot_diagnostics_sa_type),0)}"
   account_replication_type = "${element(split("_", var.boot_diagnostics_sa_type),1)}"
-  tags                     = "${var.tags}"
+
+  network_rules {
+    default_action             = "${var.default_action}"
+    virtual_network_subnet_ids = ["${var.virtual_network_subnet_ids}"]
+  }
+
+  tags = "${var.tags}"
 }
 
 resource "azurerm_virtual_machine" "vm-linux-no-az" {
-  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true"  && var.zones == "" && var.availability_set_id == "" ? var.nb_instances : 0}"
+  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true"  && var.zones == "" && var.availability_set_name == "" ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   resource_group_name           = "${var.resource_group_name}"
@@ -72,7 +78,7 @@ resource "azurerm_virtual_machine" "vm-linux-no-az" {
 }
 
 resource "azurerm_virtual_machine" "vm-linux-with-az" {
-  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true" && var.zones != "" && var.availability_set_id == "" ? var.nb_instances : 0}"
+  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true" && var.zones != "" && var.availability_set_name == "" ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   zones                         = ["${var.zones}"]
@@ -123,10 +129,10 @@ resource "azurerm_virtual_machine" "vm-linux-with-az" {
 }
 
 resource "azurerm_virtual_machine" "vm-linux-with-availability-set" {
-  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true"  && var.zones == "" && var.availability_set_id != "" ? var.nb_instances : 0}"
+  count                         = "${!contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows") && var.is_windows_image != "true"  && var.zones == "" && var.availability_set_name != "" ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
-  availability_set_id           = "${var.availability_set_id}"
+  availability_set_id           = "${azurerm_availability_set.vm-av.id}"
   resource_group_name           = "${var.resource_group_name}"
   vm_size                       = "${var.vm_size}"
   network_interface_ids         = ["${element(azurerm_network_interface.vm.*.id, count.index)}"]
@@ -170,11 +176,11 @@ resource "azurerm_virtual_machine" "vm-linux-with-availability-set" {
     storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
 
-  depends_on = ["azurerm_storage_account.vm-sa"]
+  depends_on = ["azurerm_storage_account.vm-sa", "azurerm_availability_set.vm-av"]
 }
 
 resource "azurerm_virtual_machine" "vm-windows-no-az" {
-  count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows"))) &&  var.zones == "" && var.availability_set_id == ""  ? var.nb_instances : 0}"
+  count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows"))) &&  var.zones == "" && var.availability_set_name == ""  ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   resource_group_name           = "${var.resource_group_name}"
@@ -218,7 +224,7 @@ resource "azurerm_virtual_machine" "vm-windows-no-az" {
 }
 
 resource "azurerm_virtual_machine" "vm-windows-with-az" {
-  count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows")) ) &&  var.zones != "" && var.availability_set_id == "" ? var.nb_instances : 0}"
+  count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows")) ) &&  var.zones != "" && var.availability_set_name == "" ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
   zones                         = ["${var.zones}"]
@@ -263,10 +269,10 @@ resource "azurerm_virtual_machine" "vm-windows-with-az" {
 }
 
 resource "azurerm_virtual_machine" "vm-windows-with-availability-set" {
-  count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows")) ) &&  var.zones == "" && var.availability_set_id != "" ? var.nb_instances : 0}"
+  count                         = "${((var.is_windows_image == "true" || contains(list("${var.vm_os_simple}","${var.vm_os_offer}"), "Windows")) ) &&  var.zones == "" && var.availability_set_name != "" ? var.nb_instances : 0}"
   name                          = "${var.vm_hostname}"
   location                      = "${var.location}"
-  availability_set_id           = "${var.availability_set_id}"
+  availability_set_id           = "${azurerm_availability_set.vm-av.id}"
   resource_group_name           = "${var.resource_group_name}"
   vm_size                       = "${var.vm_size}"
   network_interface_ids         = ["${element(azurerm_network_interface.vm.*.id, count.index)}"]
@@ -304,7 +310,7 @@ resource "azurerm_virtual_machine" "vm-windows-with-availability-set" {
     storage_uri = "${var.boot_diagnostics == "true" ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : "" }"
   }
 
-  depends_on = ["azurerm_storage_account.vm-sa"]
+  depends_on = ["azurerm_storage_account.vm-sa", "azurerm_availability_set.vm-av"]
 }
 
 resource "azurerm_public_ip" "vm" {
@@ -332,4 +338,13 @@ resource "azurerm_network_interface" "vm" {
   }
 
   tags = "${var.tags}"
+}
+
+resource "azurerm_availability_set" "vm-av" {
+  location                     = "${var.location}"
+  name                         = "${var.availability_set_name}"
+  platform_update_domain_count = "${var.platform_update_domain_count}"
+  platform_fault_domain_count  = "${var.platform_fault_domain_count}"
+  resource_group_name          = "${var.resource_group_name}"
+  managed                      = "${var.managed}"
 }

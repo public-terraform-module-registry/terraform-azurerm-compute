@@ -1,29 +1,99 @@
 variable "resource_group_name" {
-  description = "The name of the resource group in which the resources will be created"
-  default     = "terraform-compute"
+  description = "(Required)The name of the resource group in which the resources will be created"
 }
 
 variable "location" {
-  description = "The location/region where the virtual network is created. Changing this forces a new resource to be created."
+  description = "(Required)The location/region where the virtual network is created. Changing this forces a new resource to be created."
 }
 
+### avaulability options
 variable "zones" {
   description = "(Optional)a single item of the Availability Zone which the Virtual Machine should be allocated."
   default     = ""
 }
 
-variable "availability_set_id" {
-  description = "(Optional) The ID of the Availability Set in which the Virtual Machine should exist. Changing this forces a new resource to be created."
+## availability_set settings
+variable "availability_set_name" {
+  description = "(Optional)Specifies the name of the availability set. Changing this forces a new resource to be created."
   default     = ""
 }
 
+variable "platform_update_domain_count" {
+  description = "(Optional) Specifies the number of update domains that are used. Defaults to 5."
+  default     = "5"
+}
+
+variable "platform_fault_domain_count" {
+  description = "(Optional) Specifies the number of fault domains that are used. Defaults to 3."
+  default     = "3"
+}
+
+variable "managed" {
+  description = "(Optional) Specifies whether the availability set is managed or not. Possible values are true (to specify aligned) or false (to specify classic). Default is true."
+  default     = "true"
+}
+
+##
+###
+
+## basit settings
+variable "vm_hostname" {
+  description = "local name of the VM"
+}
+
+variable "nb_instances" {
+  description = "Specify the number of vm instances"
+  default     = "1"
+}
+
+variable "vm_size" {
+  description = "Specifies the size of the virtual machine."
+  default     = "Standard_DS1_V2"
+}
+
+variable "tags" {
+  type        = "map"
+  description = "A map of the tags to use on the resources that are deployed with this module."
+
+  default = {
+    source = "terraform"
+  }
+}
+
+##
+
+## network settings
 variable "vnet_subnet_id" {
-  description = "The subnet id of the virtual network where the virtual machines will reside."
+  description = "(Required)The subnet id of the virtual network where the virtual machines will reside."
 }
 
 variable "public_ip_dns" {
   description = "Optional globally unique per datacenter region domain name label to apply to each public ip address. e.g. thisvar.varlocation.cloudapp.azure.com where you specify only thisvar here. This is an array of names which will pair up sequentially to the number of public ips defined in var.nb_public_ip. One name or empty string is required for every public ip. If no public ip is desired, then set this to an array with a single empty string."
   default     = [""]
+}
+
+variable "public_ip_address_allocation" {
+  description = "Defines how an IP address is assigned. Options are Static or Dynamic."
+  default     = "dynamic"
+}
+
+variable "nb_public_ip" {
+  description = "Number of public IPs to assign corresponding to one IP per vm. Set to 0 to not assign any public IP addresses."
+  default     = "0"
+}
+
+variable "enable_accelerated_networking" {
+  type        = "string"
+  description = "(Optional) Enable accelerated networking on Network interface"
+  default     = "false"
+}
+
+##
+
+## OS settings
+variable "admin_username" {
+  description = "The admin username of the VM that will be deployed"
+  default     = "sysadmin"
 }
 
 variable "admin_password" {
@@ -51,18 +121,16 @@ variable "remote_port" {
   default     = ""
 }
 
-variable "admin_username" {
-  description = "The admin username of the VM that will be deployed"
-  default     = "sysadmin"
-}
-
 variable "custom_data" {
   description = "The custom data to supply to the machine. This can be used as a cloud-init for Linux systems."
   default     = ""
 }
 
+##
+
+## OS disk settings
 variable "storage_account_type" {
-  description = "Defines the type of storage account to be created. Valid options are Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS."
+  description = "(Optional)Defines the type of storage account to be created. Valid options are Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS."
   default     = "Premium_LRS"
 }
 
@@ -71,21 +139,14 @@ variable "os_disk_caching" {
   default     = "ReadWrite"
 }
 
-variable "vm_size" {
-  description = "Specifies the size of the virtual machine."
-  default     = "Standard_DS1_V2"
+variable "delete_os_disk_on_termination" {
+  description = "Delete os disk when machine is terminated"
+  default     = "false"
 }
 
-variable "nb_instances" {
-  description = "Specify the number of vm instances"
-  default     = "1"
-}
+##
 
-variable "vm_hostname" {
-  description = "local name of the VM"
-  default     = "myvm"
-}
-
+## image settings
 variable "vm_os_simple" {
   description = "Specify UbuntuServer, WindowsServer, RHEL, openSUSE-Leap, CentOS, Debian, CoreOS and SLES to get the latest image version of the specified os.  Do not provide this value if a custom value is used for vm_os_publisher, vm_os_offer, and vm_os_sku."
   default     = ""
@@ -121,30 +182,9 @@ variable "vm_os_version" {
   default     = "latest"
 }
 
-variable "tags" {
-  type        = "map"
-  description = "A map of the tags to use on the resources that are deployed with this module."
+##
 
-  default = {
-    source = "terraform"
-  }
-}
-
-variable "public_ip_address_allocation" {
-  description = "Defines how an IP address is assigned. Options are Static or Dynamic."
-  default     = "dynamic"
-}
-
-variable "nb_public_ip" {
-  description = "Number of public IPs to assign corresponding to one IP per vm. Set to 0 to not assign any public IP addresses."
-  default     = "1"
-}
-
-variable "delete_os_disk_on_termination" {
-  description = "Delete os disk when machine is terminated"
-  default     = "false"
-}
-
+### boot diagnostics settings
 variable "boot_diagnostics" {
   description = "(Optional) Enable or Disable boot diagnostics"
   default     = "false"
@@ -159,8 +199,16 @@ variable "boot_diagnostics_sa_type" {
   default     = "Standard_LRS"
 }
 
-variable "enable_accelerated_networking" {
-  type        = "string"
-  description = "(Optional) Enable accelerated networking on Network interface"
-  default     = "false"
+## A network_rules block 
+variable "default_action" {
+  description = "(Required) Specifies the default action of allow or deny when no other rules match. Valid options are Deny or Allow"
+  default     = "Deny"
 }
+
+variable "virtual_network_subnet_ids" {
+  description = "(Required) A list of resource ids for subnets."
+  type        = "list"
+}
+
+###
+
